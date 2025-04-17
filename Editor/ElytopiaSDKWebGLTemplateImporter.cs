@@ -7,18 +7,20 @@ using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 namespace ElytopiaEditor.Editor
 {
     [InitializeOnLoad]
-    public class ElytopiaSDKWebGLTemplateImporter
+    public static class ElytopiaSDKWebGLTemplateImporter
     {
         private const string SourcePath = "Packages/elytopia.world/Editor/WebGL Template";
         private const string TargetRoot = "Assets/WebGLTemplates";
         private const string PackageAnchor = "Packages/elytopia.world/Runtime/Elytopia.asmdef";
-        public static bool IsEnableAutoInstall = true;
 
-        static ElytopiaSDKWebGLTemplateImporter()
+        public static bool IsEnableAutoInstall
         {
-            EditorApplication.delayCall += EditorAutoTryInstallTemplate;
+            get => EditorPrefs.GetBool(nameof(ElytopiaSDKWebGLTemplateImporter), true);
+            set => EditorPrefs.SetBool(nameof(ElytopiaSDKWebGLTemplateImporter), value);
         }
 
+        static ElytopiaSDKWebGLTemplateImporter() => EditorApplication.delayCall += EditorAutoTryInstallTemplate;
+        
         private static void EditorAutoTryInstallTemplate()
         {
             if (IsEnableAutoInstall == false)
@@ -57,9 +59,7 @@ namespace ElytopiaEditor.Editor
         {
             packageInfo = PackageInfo.FindForAssetPath(PackageAnchor);
             if (packageInfo == null)
-            {
                 Debug.LogWarning($"[{nameof(ElytopiaSDK)}] Package not found in path: " + PackageAnchor);
-            }
 
             return packageInfo != null;
         }
