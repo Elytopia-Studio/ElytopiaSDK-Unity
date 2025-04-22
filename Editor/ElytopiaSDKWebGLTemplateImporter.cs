@@ -21,7 +21,7 @@ namespace ElytopiaEditor.Editor
 
         static ElytopiaSDKWebGLTemplateImporter() => EditorApplication.delayCall += EditorAutoTryInstallTemplate;
         
-        private static void EditorAutoTryInstallTemplate()
+        public static void EditorAutoTryInstallTemplate()
         {
             if (IsEnableAutoInstall == false)
                 return;
@@ -97,7 +97,7 @@ namespace ElytopiaEditor.Editor
 
         private static string GetTemplateName(string version)
         {
-            return $"{nameof(ElytopiaSDK)} {version}";
+            return $"{nameof(ElytopiaSDK)} {version}".Replace("SDK", "");
         }
 
         private static void CopyDirectory(string sourceDir, string destinationDir)

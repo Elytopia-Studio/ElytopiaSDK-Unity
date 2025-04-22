@@ -4,7 +4,6 @@
     <meta charset="utf-8"/>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Unity WebGL Player | Pet World</title>
-    <link rel="shortcut icon" href="TemplateData/favicon.ico"/>
     <link rel="stylesheet" href="TemplateData/style.css"/>
 </head>
 <body>
@@ -96,6 +95,9 @@
                     break;
                 case "progress":
                     window.location = "uniwebview://progress?value=" + values;
+                    break;
+                case "debuglog":
+                    window.location = "uniwebview://debuglog?type=" + command + "&text=" + values;
                     break;
                 default:
                     console.error("Unsupported Code! code=" + code + "; command=" + command + "; values=" + values);

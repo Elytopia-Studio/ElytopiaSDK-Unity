@@ -1,7 +1,9 @@
 ﻿using System;
+using UnityEngine.Scripting;
 
 namespace Elytopia.Analytics.AnalyticsData
 {
+    [Preserve]
     [Serializable]
     internal class FpsEvent : AnalyticsEventData
     {

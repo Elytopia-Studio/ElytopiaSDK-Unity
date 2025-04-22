@@ -1,10 +1,12 @@
 ﻿using System;
+using UnityEngine.Scripting;
 
 namespace Elytopia.Analytics
 {
+    [Preserve]
     [Serializable]
     public class AnalyticsEventData
     {
-        public AnalyticsDataType Type;
+        [Preserve] public AnalyticsDataType Type;
     }
 }

@@ -1,23 +1,25 @@
 mergeInto(LibraryManager.library, {
     JS_Log_Dump: function (ptr, type) {
         var msg = UTF8ToString(ptr);
-        if (type === 0 || type === 1 || type === 4) {
-            if (typeof SendMessage === "function") {
-                SendMessage("ElytopiaSDK", "OnReceiveFromConsole", encodeURIComponent(msg));
-            }
+        
+        if (typeof dump == 'function')
+            dump (msg);
+        
+        if (typeof window.ElytopiaHubProvider === 'function') {
+            window.ElytopiaHubProvider("debuglog", type, msg);
         }
-
+        
         switch (type) {
-            case 0:
-            case 1:
-            case 4:
+            case 0: //LogType_Error
+            case 1: //LogType_Assert
+            case 4: //LogType_Exception
                 console.error(msg);
                 break;
-            case 2:
+            case 2: //LogType_Warning
                 console.warn(msg);
                 break;
-            case 3:
-            case 5:
+            case 3: //LogType_Log
+            case 5: //LogType_Debug
                 console.log(msg);
                 break;
             default:
