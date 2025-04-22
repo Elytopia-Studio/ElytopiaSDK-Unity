@@ -1,15 +1,22 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Elytopia
 {
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     public interface IGameBridge
     {
         event Action<GameHubCommand, string> OnReceiveEvent;
+        event Action<string> PurchaseSuccessEvent;
+        event Action<string> PurchaseFailedEvent;
+        
         void SendToHub(GameHubCommand command, string values = null);
         void CloseGame();
         Task<ResultContext> ShowInterstitialAdAsync();
+        void PurchaseProduct(string productId);
         void SendFpsAnalytics(string data);
     }
 
@@ -20,11 +27,12 @@ namespace Elytopia
         CloseGame = 2,
         SaveValue = 3,
         LoadSavableValue = 4,
-        ShowInterstitialAd = 5,
+        ShowInterstitialAd = 5, //result: ResultContext
         ShowRewardedAd = 6, //result: ResultContext
         ShowBannerAd = 7,
         Analytics = 8,
         ThrowExceptionDetected = 9,
+        PurchaseExternalProduct = 10 //result: ResultContext
     }
 
     public enum ResultContext : byte
@@ -61,7 +69,7 @@ namespace Elytopia
 #if !ELYTOPIA_DISABLE_SERIALAZER
             Serialization.JsonProjectSettings.ApplySettings();
 #endif
-            
+
 #if !ELYTOPIA_DISABLE_SDK
             var bridge = new GameObject().AddComponent<ElytopiaSDK>();
             bridge.name = nameof(ElytopiaSDK);
@@ -73,7 +81,7 @@ namespace Elytopia
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void Disposer() => Instance = null;
 
-#if  UNITY_WEBGL && !ELYTOPIA_DISABLE_SDK
+#if UNITY_WEBGL && !ELYTOPIA_DISABLE_SDK
         private void Start() => SendToHub(GameHubCommand.SystemInitialize);
 #endif
 
@@ -90,7 +98,8 @@ namespace Elytopia
             }
             catch (Exception e)
             {
-                Debug.LogError($"[{nameof(ElytopiaSDK)}] Error send! error={e.Message}; command={command}; values: {values}");
+                Debug.LogError(
+                    $"[{nameof(ElytopiaSDK)}] Error send! error={e.Message}; command={command}; values: {values}");
             }
         }
 
@@ -102,34 +111,35 @@ namespace Elytopia
 
             var eventType = eventCode.ToEnum<GameHubCommand>();
             InternalProcessReceiveFromHub(eventType, value);
-            
-            OnReceiveEvent?.Invoke(eventType, value);
-        }
 
-        public void OnReceiveFromConsole(string exceptionMessage)
-        {
-            // if (exceptionMessage.Contains("uniwebview"))
-            //     return;
-            // SendToHub(GameHubCommand.ThrowExceptionDetected, exceptionMessage);
+            OnReceiveEvent?.Invoke(eventType, value);
         }
 
         private void OnDestroy()
         {
-            _habRequest?.SetCanceled();
-            _habRequest = null;
+            _habRequestInterstitial?.SetCanceled();
         }
 
         #region Public
 
-        private TaskCompletionSource<ResultContext> _habRequest;
+        public event Action<string> PurchaseSuccessEvent;
+        public event Action<string> PurchaseFailedEvent;
         
+        private TaskCompletionSource<ResultContext> _habRequestInterstitial;
+
         public void CloseGame() => SendToHub(GameHubCommand.CloseGame);
 
         public Task<ResultContext> ShowInterstitialAdAsync()
         {
-            _habRequest = new TaskCompletionSource<ResultContext>();
-            SendToHub(GameHubCommand.CloseGame);
-            return _habRequest.Task;
+            _habRequestInterstitial?.SetCanceled();
+            _habRequestInterstitial = new TaskCompletionSource<ResultContext>();
+            SendToHub(GameHubCommand.ShowInterstitialAd);
+            return _habRequestInterstitial.Task;
+        }
+
+        public void PurchaseProduct(string productId)
+        {
+            SendToHub(GameHubCommand.PurchaseExternalProduct, productId);
         }
 
         public void SendFpsAnalytics(string data) => SendToHub(GameHubCommand.Analytics, data);
@@ -139,15 +149,31 @@ namespace Elytopia
             switch (command)
             {
                 case GameHubCommand.ShowInterstitialAd:
-                    var result = values.ToEnum<ResultContext>();
-                    _habRequest.SetResult(result);
-                    _habRequest = null;
+                    var interstitialResult = values.ToEnum<ResultContext>();
+                    _habRequestInterstitial?.SetResult(interstitialResult);
+                    _habRequestInterstitial = null;
+                    break;
+                case GameHubCommand.PurchaseExternalProduct:
+                    var purchaseResult = JsonConvert.DeserializeObject<KeyValueContainer<string, ResultContext>>(values);
+                    Debug.Assert(purchaseResult != null, nameof(purchaseResult) + " != null");
+                    if (purchaseResult.value == ResultContext.Success)
+                        PurchaseSuccessEvent?.Invoke(purchaseResult.key);
+                    else
+                        PurchaseFailedEvent?.Invoke(purchaseResult.key);
                     break;
             }
         }
+
         #endregion
+        
+        [Serializable]
+        private class KeyValueContainer<TKey, TValue>
+        {
+            public TKey key;
+            public TValue value;
+        }
     }
-    
+
     internal static class EnumExtensions
     {
         public static TEnum ToEnum<TEnum>(this string value, TEnum defaultValue = default) where TEnum : struct, Enum

@@ -97,6 +97,9 @@
                 case "progress":
                     window.location = "uniwebview://progress?value=" + values;
                     break;
+                case "debuglog":
+                    window.location = "uniwebview://debuglog?type=" + command + "&text=" + values;
+                    break;
                 default:
                     console.error("Unsupported Code! code=" + code + "; command=" + command + "; values=" + values);
                     break;
