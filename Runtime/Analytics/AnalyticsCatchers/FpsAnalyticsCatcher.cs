@@ -52,7 +52,7 @@ namespace Elytopia.Analytics.AnalyticsCatchers
             var data = new AnalyticsData.FpsEvent()
             {
                 AvgFps = _framesCount / _timeBtwRequests,
-                Fps30 = _framesCount30 / _timeBtwRequests,
+                Fps30 = _framesCount30 / (float)_framesCount,
                 Fps20 = _framesCount20 / (float)_framesCount,
             };
             

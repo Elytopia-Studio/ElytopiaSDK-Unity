@@ -6,7 +6,6 @@ using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
 namespace ElytopiaEditor.Editor
 {
-    [InitializeOnLoad]
     public static class ElytopiaSDKWebGLTemplateImporter
     {
         private const string SourcePath = "Packages/elytopia.world/Editor/WebGL Template";
@@ -19,8 +18,6 @@ namespace ElytopiaEditor.Editor
             set => EditorPrefs.SetBool(nameof(ElytopiaSDKWebGLTemplateImporter), value);
         }
 
-        static ElytopiaSDKWebGLTemplateImporter() => EditorApplication.delayCall += EditorAutoTryInstallTemplate;
-        
         public static void EditorAutoTryInstallTemplate()
         {
             if (IsEnableAutoInstall == false)

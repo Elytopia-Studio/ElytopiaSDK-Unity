@@ -6,6 +6,6 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("ElytopiaHub.Editor")]
 [assembly: InternalsVisibleTo("ElytopiaHub.UnitTests")]
 [assembly: InternalsVisibleTo("ElytopiaHub.IntegrationTests")]
-[assembly: AssemblyTitle("ElytopiaSKD")]
+[assembly: AssemblyTitle("ElytopiaSDK")]
 [assembly: CLSCompliant(false)]      
-[assembly: AssemblyVersion("1.0.0")]
+[assembly: AssemblyVersion("1.1.0")]

@@ -82,6 +82,10 @@ namespace Elytopia
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void Disposer() => Instance = null;
 
+#if UNITY_EDITOR && !ELYTOPIA_DISABLE_SDK
+        private void Awake() => EditorNamingValidate();
+#endif
+
 #if UNITY_WEBGL && !ELYTOPIA_DISABLE_SDK
         private void Start() => SendToHub(GameHubCommand.SystemInitialize);
 #endif
@@ -100,8 +104,7 @@ namespace Elytopia
             }
             catch (Exception e)
             {
-                Debug.LogError(
-                    $"[{nameof(ElytopiaSDK)}] Error send! error={e.Message}; command={command}; values: {values}");
+                Debug.LogError($"[{nameof(ElytopiaSDK)}] Error send! error={e.Message}; command={command}; values: {values}");
             }
         }
 
@@ -117,6 +120,13 @@ namespace Elytopia
             OnReceiveEvent?.Invoke(eventType, value);
         }
 
+        private void EditorNamingValidate()
+        {
+            var sdk = GameObject.Find(nameof(ElytopiaSDK));
+            if (sdk != null && sdk != gameObject)
+                throw new ArgumentException($"Duplicate {sdk.name} name in scene not allowed! Change name or delete gameObject");
+        }
+        
         private void OnDestroy()
         {
             _habRequestInterstitial?.SetCanceled();

@@ -29,9 +29,9 @@ mergeInto(LibraryManager.library, {
     },
 
     ElytopiaSDKExplorer: function (commandPtr, valuesPtr) {
-        var command = encodeURIComponent(UTF8ToString(commandPtr));
-        var values = encodeURIComponent(UTF8ToString(valuesPtr));
-
+        var command = UTF8ToString(commandPtr);
+        var values = UTF8ToString(valuesPtr);
+        
         if (typeof window.ElytopiaHubProvider === 'function') {
             window.ElytopiaHubProvider("message", command, values);
         } else {

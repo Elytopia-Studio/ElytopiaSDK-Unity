@@ -3,10 +3,10 @@ using UnityEditor;
 
 namespace ElytopiaEditor.Editor
 {
-    [InitializeOnLoad]
     internal static class ElytopiaSDKMenu
     {
-        static ElytopiaSDKMenu()
+        [InitializeOnLoadMethod]
+        private static void AutoElytopiaSDKMenu()
         {
             ElytopiaSDKWebGLTemplateImporter.EditorAutoTryInstallTemplate();
             EditorApplication.delayCall += ElytopiaSDKWebGLTemplateImporter.EditorAutoTryInstallTemplate;

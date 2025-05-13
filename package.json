@@ -1,6 +1,6 @@
 {
   "name": "elytopia.world",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "displayName": "Elytopia",
   "unity": "2020.3",
   "description": "Library for working with the Elytopia under WebGL",
